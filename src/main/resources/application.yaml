@@ -1,3 +1,76 @@
+# Базовые настройки приложения
 spring:
   application:
     name: notifybot
+  
+  # Конфигурация базы данных PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/reminder_db
+    username: reminder_user
+    password: ${DB_PASSWORD:your_password_here}  # Рекомендуется использовать переменные окружения
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  # Конфигурация JPA и Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update  # Или 'validate' после создания таблиц вручную
+    show-sql: true      # Показывать SQL в логах (можно отключить в prod)
+    properties:
+      hibernate:
+        # Диалект для PostgreSQL
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Красивое форматирование SQL
+        format_sql: true
+        # Часовой пояс для временных меток
+        jdbc:
+          time_zone: UTC
+        # Статистика запросов (полезно для отладки N+1)
+        generate_statistics: false  # true для отладки, false для production
+        # Размер пакета для ленивой загрузки коллекций
+        default_batch_fetch_size: 20
+    # Отключаем открытую сессию в представлении (рекомендуется)
+    open-in-view: false
+  
+  # Конфигурация RabbitMQ (для будущего использования)
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    connection-timeout: 5000
+
+# Настройки Jackson для JSON сериализации
+jackson:
+  serialization:
+    write-dates-as-timestamps: false  # ZonedDateTime как строки ISO
+    indent-output: true               # Красивый вывод JSON
+  deserialization:
+    adjust-dates-to-context-time-zone: false
+  time-zone: UTC
+
+# Настройки сервера
+server:
+  port: 8080
+  servlet:
+    context-path: /api  # Базовый путь для всех эндпоинтов
+
+# Настройки логгирования
+logging:
+  level:
+    home.makuznetsov.notifybot: DEBUG
+    # Spring Data JPA
+    org.springframework.data.jpa: INFO
+    org.hibernate.SQL: DEBUG            # Показывать SQL запросы
+    org.hibernate.type.descriptor.sql: TRACE  # Показывать параметры SQL (опционально)
+    # EntityManager и транзакции
+    org.hibernate.stat: DEBUG           # Статистика Hibernate
+    org.springframework.transaction: INFO
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
