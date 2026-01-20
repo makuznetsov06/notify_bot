@@ -1,3 +1,10 @@
+telegram:
+  bot:
+    username: ${TELEGRAM_BOT_USERNAME:remind_my_routine_bot}  # Без @
+    token: ${TELEGRAM_BOT_TOKEN:your_bot_token}
+    path: /webhook  # Путь для webhook
+    url: ${TELEGRAM_BOT_WEBHOOK_URL:localhost}  # Ваш домен
+
 # Базовые настройки приложения
 spring:
   application:
