@@ -38,8 +38,27 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User getUserByTelegramId(Long telegramId) {
-        return userRepository.findByTelegramUserId(telegramId)
-                .orElseThrow(() -> new RuntimeException("User not found with telegram ID: " + telegramId));
+    public Optional<User> getUserByTelegramId(Long telegramId) {
+        return userRepository.findByTelegramUserId(telegramId);
+    }
+
+    @Transactional
+    public void updateNameByTelegramId(Long telegramUserId, String firstName){
+        int updated = userRepository.updateNameByTelegramId(telegramUserId, firstName);
+        if (updated > 0) {
+            log.info("Updated name for user {}: {}", telegramUserId, firstName);
+        } else {
+            log.warn("User {} not found for name update", telegramUserId);
+        }
+    }
+
+    @Transactional
+    public void updateUserActivity(Long telegramUserId, boolean isActive){
+        int updated = userRepository.updateActivityStatusByTelegramId(telegramUserId, isActive);
+        if (updated > 0) {
+            log.info("Updated activity status for user {}: {}", telegramUserId, isActive);
+        } else {
+            log.warn("User {} not found for activity update", telegramUserId);
+        }
     }
 }

@@ -35,9 +35,6 @@ public class User {
     @Column(name = "first_name")
     private String firstName;
 
-    @Column(name = "last_name")
-    private String lastName;
-
     @CreationTimestamp
     @Column(name = "registered_at", nullable = false, updatable = false)
     private ZonedDateTime registeredAt;
@@ -51,16 +48,9 @@ public class User {
 
     @Column(name = "timezone", length = 50)
     @Builder.Default
-    private String timezone = "UTC";
+    private String timezone = "UTC+3";
 
-    // Обратная связь с Reminder (OneToMany)
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Builder.Default
     private List<Reminder> reminders = new ArrayList<>();
-
-    // Вспомогательный метод для добавления напоминания
-    public void addReminder(Reminder reminder) {
-        reminders.add(reminder);
-        reminder.setUser(this);
-    }
 }

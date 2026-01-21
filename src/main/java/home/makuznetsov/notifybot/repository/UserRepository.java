@@ -3,7 +3,9 @@ package home.makuznetsov.notifybot.repository;
 import home.makuznetsov.notifybot.entity.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,6 +36,28 @@ public interface UserRepository extends JpaRepository<User, Long> {
         ORDER BY reminderCount DESC
     """)
     List<Object[]> getUsersWithReminderCount();
+
+    @Modifying
+    @Query("""
+            UPDATE User u
+            SET u.firstName = :firstName
+            WHERE u.telegramUserId = :telegramUserId
+    """)
+    int updateNameByTelegramId(
+            @Param("telegramUserId") Long telegramUserId,
+            @Param("firstName") String firstName
+    );
+
+    @Modifying
+    @Query("""
+            UPDATE User u 
+            SET u.isActive = :isActive 
+            WHERE u.telegramUserId = :telegramUserId
+    """)
+    int updateActivityStatusByTelegramId(
+            @Param("telegramUserId") Long telegramUserId,
+            @Param("isActive") Boolean isActive
+    );
 
     void deleteById(Long id);
 }

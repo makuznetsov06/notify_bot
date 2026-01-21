@@ -1,20 +1,23 @@
 telegram:
   bot:
     username: ${TELEGRAM_BOT_USERNAME:remind_my_routine_bot}  # Без @
-    token: ${TELEGRAM_BOT_TOKEN:your_bot_token}
+    token: ${TELEGRAM_BOT_TOKEN}
     path: /webhook  # Путь для webhook
-    url: ${TELEGRAM_BOT_WEBHOOK_URL:localhost}  # Ваш домен
 
+telegrambots:
+  enabled: true
 # Базовые настройки приложения
 spring:
   application:
     name: notifybot
+  main:
+    allow-bean-definition-overriding: true
   
   # Конфигурация базы данных PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/reminder_db
+    url: jdbc:postgresql://${DB_HOST}}:5432/reminder_db
     username: reminder_user
-    password: ${DB_PASSWORD:your_password_here}  # Рекомендуется использовать переменные окружения
+    password: ${DB_PASSWORD}  # Рекомендуется использовать переменные окружения
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -46,11 +49,39 @@ spring:
   
   # Конфигурация RabbitMQ (для будущего использования)
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
+    host: ${RABBITMQ_HOST}
     port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
+    username: ${RABBITMQ_USERNAME:reminder_user}
+    password: ${RABBITMQ_PASSWORD}
     connection-timeout: 5000
+    listener:
+      simple:
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          initial-interval: 5000ms
+          multiplier: 2.0
+          max-interval: 30000ms
+          max-retries: 3
+        acknowledge-mode: auto
+    template:
+      exchange: "reminder.delayed.exchange"
+      routing-key: "reminder.key"
+      mandatory: true
+      receive-timeout: 10000
+
+      # Настройки JSON конвертера
+    jackson:
+      default-property-inclusion: non_null
+      deserialization:
+        fail_on_unknown_properties: false
+
+app:
+  reminders:
+    max-processing-delay-minutes: 5  # Макс. задержка обработки
+    cleanup:
+      sent-after-days: 30  # Удалять отправленные через 30 дней
+      cancelled-after-days: 7  # Удалять отмененные через 7 дней
 
 # Настройки Jackson для JSON сериализации
 jackson:
@@ -64,20 +95,19 @@ jackson:
 # Настройки сервера
 server:
   port: 8080
-  servlet:
-    context-path: /api  # Базовый путь для всех эндпоинтов
 
 # Настройки логгирования
 logging:
   level:
-    home.makuznetsov.notifybot: DEBUG
+    home.makuznetsov.notifybot: INFO
     # Spring Data JPA
     org.springframework.data.jpa: INFO
-    org.hibernate.SQL: DEBUG            # Показывать SQL запросы
-    org.hibernate.type.descriptor.sql: TRACE  # Показывать параметры SQL (опционально)
+    org.hibernate.SQL: INFO            # Показывать SQL запросы
+    org.hibernate.type.descriptor.sql: INFO  # Показывать параметры SQL (опционально)
     # EntityManager и транзакции
-    org.hibernate.stat: DEBUG           # Статистика Hibernate
+    org.hibernate.stat: INFO           # Статистика Hibernate
     org.springframework.transaction: INFO
+    org.telegram.telegrambots: INFO
   pattern:
     console: "%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

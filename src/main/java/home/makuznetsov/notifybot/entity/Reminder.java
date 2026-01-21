@@ -17,15 +17,10 @@ import java.time.ZonedDateTime;
 @Builder
 public class Reminder {
 
-    public enum ReminderStatus {
-        SCHEDULED, SENT, CANCELLED
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Прямая связь с User (ManyToOne)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

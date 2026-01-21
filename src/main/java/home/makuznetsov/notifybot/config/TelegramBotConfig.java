@@ -18,7 +18,6 @@ public class TelegramBotConfig {
     private String username;
     private String token;
     private String path;
-    private String url;
 
     @Bean
     public TelegramBotsApi telegramBotsApi() throws TelegramApiException {

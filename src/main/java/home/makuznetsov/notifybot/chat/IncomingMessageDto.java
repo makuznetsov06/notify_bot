@@ -5,7 +5,9 @@ import lombok.Data;
 
 @Data
 @Builder
-public class IncomingMessage {
+public class IncomingMessageDto {
     Long telegramId;
+    String username;
     String message;
+    String callbackData;
 }
