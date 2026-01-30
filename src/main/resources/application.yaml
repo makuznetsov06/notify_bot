@@ -54,6 +54,8 @@ spring:
     username: ${RABBITMQ_USERNAME:reminder_user}
     password: ${RABBITMQ_PASSWORD}
     connection-timeout: 5000
+    ssl:
+      enabled: false
     listener:
       simple:
         default-requeue-rejected: false
