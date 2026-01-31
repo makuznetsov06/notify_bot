@@ -6,6 +6,7 @@ import home.makuznetsov.notifybot.impl.handler.DefaultMessageHandler;
 import home.makuznetsov.notifybot.service.TelegramBotService;
 import home.makuznetsov.notifybot.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MessageHandler implements InitializingBean {
 
     private final List<ChatInbound> messageHandlers;
@@ -30,6 +32,7 @@ public class MessageHandler implements InitializingBean {
                     .orElse(defaultMessageHandler);
             handler.handle(message, user);
         } catch (Exception e) {
+            log.error("Error while handling message: {}", message, e);
             botService.sendErrorMarkdownMessage(message.getTelegramId());
         }
     }
