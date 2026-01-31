@@ -70,6 +70,7 @@ public class TelegramBotController extends TelegramWebhookBot {
                 .telegramId(update.message().from().id())
                 .username(update.message().from().username())
                 .message(update.message().text())
+                .callbackData("")
                 .build();
     }
 
